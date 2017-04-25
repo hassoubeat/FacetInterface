@@ -21,6 +21,9 @@ public class ToyTalk {
      * @param isSerialize 読み上げ完了を待機するかを判定するフラグ(Trueで待機, falseで待たないで次の処理を実行)
      */
     static public void talking(String talkString, boolean isSerialize) {
+        
+        talkString = unTalkableStringReplace(talkString);
+        
         Runtime runTime = Runtime.getRuntime();
         String command = TALKING_COMMAND + " " + talkString;
         try {
@@ -34,6 +37,20 @@ public class ToyTalk {
             // 実行失敗時の挙動定義
             throw new ToyTalkException();
         }
+    }
+    
+    /**
+     * ToyTalkでしゃべれない文字を変換する
+     * @param talkString 
+     */
+    static private String unTalkableStringReplace(String talkString) {
+        // 読めない文字の変換と削除
+        talkString = talkString.replace("\n", "");
+        talkString = talkString.replace("\u0020", "");
+        talkString = talkString.replace("#", "");
+        talkString = talkString.replace("(", "");
+        talkString = talkString.replace(")", "");
+        return talkString;
     }
     
 }
