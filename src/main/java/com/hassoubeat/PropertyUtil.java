@@ -6,11 +6,12 @@
 package com.hassoubeat;
 
 
-import org.apache.commons.configuration2.Configuration;
-import org.apache.commons.configuration2.PropertiesConfiguration;
-import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
-import org.apache.commons.configuration2.builder.fluent.Configurations;
-import org.apache.commons.configuration2.ex.ConfigurationException;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.util.Properties;
 
 /**
  *
@@ -28,14 +29,15 @@ public class PropertyUtil {
      */
     public String load(String filePath, String key) {
         String fullFilePath = PROPERTY_FILE_PATH + filePath;
-        Configurations configs = new Configurations();
-        Configuration config;
-        try {
-            config = configs.properties(fullFilePath);
-        } catch (ConfigurationException ex) {
-            throw new ToyTalkException("プロパティの取得に失敗しました。", ex);
+        String param = "";
+        try{
+            Properties prop = new Properties();
+            prop.load(new InputStreamReader(new FileInputStream(fullFilePath), "UTF-8"));
+            param = prop.getProperty(key);
         }
-        String param = config.getString(key);
+        catch(IOException ex){
+            throw new ToyTalkException("プロパティの取得に失敗しました。", ex);
+        } 
         return param;
     }
     
@@ -47,19 +49,15 @@ public class PropertyUtil {
      */
     public void save(String filePath, String key, String param) {
         String fullFilePath = PROPERTY_FILE_PATH + filePath;
-        Configurations configs = new Configurations();
-        FileBasedConfigurationBuilder<PropertiesConfiguration> builder = configs.propertiesBuilder(fullFilePath);
-        PropertiesConfiguration config;
         try {
-            config = builder.getConfiguration();
-            config.setProperty(key, param);
-        } catch (ConfigurationException ex) {
+            Properties prop = new Properties();
+            prop.load(new InputStreamReader(new FileInputStream(fullFilePath), "UTF-8"));
+            prop.setProperty(key, param);
+            prop.store(new FileOutputStream(fullFilePath), "任意のコメント");
+        } catch (UnsupportedEncodingException ex) {
             throw new ToyTalkException("プロパティの上書きに失敗しました。", ex);
-        }
-        try {
-            builder.save();
-        } catch (ConfigurationException ex) {
-            throw new ToyTalkException("プロパティファイルの保存に失敗しました。", ex);
+        } catch (IOException ex) {
+            throw new ToyTalkException("プロパティの上書きに失敗しました。", ex);
         }
     }
     
